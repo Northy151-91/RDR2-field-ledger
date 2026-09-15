@@ -379,6 +379,16 @@ function renderAnimals(){
   $("#animals").innerHTML=`<div class="section-title"><h2>Animal Guide</h2></div><div class="note">Each entry now includes practical habitat, behaviour, bait and spawn-reset advice.</div><div class="list">${animals.map(a=>{const loc=ANIMAL_LOCATIONS[a]||{};return `<div class="row animal-card" onclick="selectedAnimal='${a}';render()"><div class="row-top"><div><h3>${esc(a.replace(/\b\w/g,c=>c.toUpperCase()))}</h3><div class="sub">${esc(loc.best||"")}<br>${esc(loc.time||"")} · ${esc(loc.habitat||"")}</div></div><span class="check">›</span></div></div>`}).join("")}</div>`;
  }
 }
+
+function horseStatsHtml(h){
+ if(!h.stats) return `<div class="statbox"><div class="horse-section">Base stats</div><div class="sub">Stats vary by coat for this generic breed entry.</div></div>`;
+ const s=h.stats;
+ const bar=(label,val)=>`<div class="stat"><b>${label}</b><div class="statbar"><i style="width:${Math.min(100,val*10)}%"></i></div><div class="statval">${val}/10</div></div>`;
+ return `<div class="statbox"><div class="horse-section">Base stats</div><div class="statgrid">
+ ${bar("Health",s.health)}${bar("Stamina",s.stamina)}${bar("Speed",s.speed)}${bar("Acceleration",s.accel)}
+ </div><div class="sub" style="margin-top:7px"><b>Handling:</b> ${esc(s.handling)}</div></div>`;
+}
+
 function renderHorses(){
  const wild=HORSES.filter(h=>h.type!=="Stable only"&&h.type!=="Stable purchase");
  const buy=HORSES.filter(h=>h.type==="Stable only"||h.type==="Stable purchase");
