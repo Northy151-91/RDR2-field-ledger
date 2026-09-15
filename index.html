@@ -99,12 +99,25 @@ body{
 .family-summary{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
 .family-summary .badge{margin:0}
 
+
+.install-card{border:1px solid var(--line);background:rgba(255,255,255,.22);padding:12px;border-radius:12px;margin:10px 0}
+.install-card h3{margin:0 0 4px 0}
+.install-card .sub{margin-bottom:10px}
+.install-actions{display:flex;gap:8px;flex-wrap:wrap}
+.install-actions button{min-height:42px}
+
 @media(min-width:600px){#bottomSpacer{height:110px}
  .selector{grid-template-columns:1fr 1fr}.grid{grid-template-columns:repeat(4,1fr)}
  nav{left:50%;right:auto;transform:translateX(-50%);width:min(760px,100%)}
  .modal{height:auto;max-height:82vh}.launch-grid{grid-template-columns:repeat(3,1fr)}
 }
-</style></head>
+</style>
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Field Ledger">
+
+</head>
 <body>
 <header><div class="header-row"><h1>RDR2 Field Ledger</h1></div><input id="search" class="search" placeholder="Search animals, crafts or recipes…" autocomplete="off"></header>
 <main>
@@ -124,6 +137,17 @@ body{
 </nav>
 
 
+
+
+<div id="installModal" class="modal-backdrop" onclick="if(event.target===this)closeInstallHelp()">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h2>Install RDR2 Field Ledger</h2><div class="sub">Use it like a normal app</div></div>
+      <button class="modal-close" onclick="closeInstallHelp()">×</button>
+    </div>
+    <div id="installModalBody"></div>
+  </div>
+</div>
 
 <div id="animalModal" class="modal-backdrop" onclick="if(event.target===this)closeAnimalModal()">
   <div class="modal">
@@ -520,5 +544,54 @@ function renderMore(){
  <div class="section-title"><h2>Reference</h2></div><div class="card"><div class="sub">Animal and horse notes use established Story Mode spawn areas. Spawn RNG still applies, so camp/sleep or leave and return if an animal or herd does not appear.</div></div>`;
 }
 function render(){document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===current));document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===current));renderDashboard();renderHunt();renderAnimals();renderHorses();renderCrafts();renderRecipes();renderMore()}
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{current=b.dataset.view;window.scrollTo(0,0);render()});$("#search").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();render()});if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");render();
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{current=b.dataset.view;window.scrollTo(0,0);render()});$("#search").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();render()});if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+});
+window.addEventListener("appinstalled",()=>{ deferredInstallPrompt=null; });
+
+function isIos(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function isStandalone(){
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone===true;
+}
+async function installPwa(){
+  if(isStandalone()){
+    alert("RDR2 Field Ledger is already installed on this device.");
+    return;
+  }
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    try{ await deferredInstallPrompt.userChoice; }catch(e){}
+    deferredInstallPrompt=null;
+    return;
+  }
+  showInstallHelp();
+}
+function showInstallHelp(){
+  let html="";
+  if(isStandalone()){
+    html=`<div class="note">RDR2 Field Ledger is already installed on this device.</div>`;
+  }else if(isIos()){
+    html=`<div class="card"><h3>iPhone / iPad</h3>
+      <div class="sub">1. Open this site in Safari.</div>
+      <div class="sub">2. Tap the <b>Share</b> button.</div>
+      <div class="sub">3. Scroll down and tap <b>Add to Home Screen</b>.</div>
+      <div class="sub">4. Tap <b>Add</b>.</div>
+    </div>`;
+  }else{
+    html=`<div class="card"><h3>Android / Windows / Mac</h3>
+      <div class="sub">Tap <b>Install App</b>. If your browser does not show an install prompt, open the browser menu and choose <b>Install app</b>, <b>Add to Home screen</b>, or <b>Apps → Install this site as an app</b>.</div>
+      <div class="sub" style="margin-top:8px">Chrome and Edge provide the smoothest installation experience.</div>
+    </div>`;
+  }
+  $("#installModalBody").innerHTML=html;
+  $("#installModal").classList.add("open");
+}
+function closeInstallHelp(){$("#installModal").classList.remove("open")}
+
+render();
 </script></body></html>
