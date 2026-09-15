@@ -1,0 +1,8 @@
+{
+  "name": "RDR2 Field Ledger",
+  "short_name": "Field Ledger",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#d7c39b",
+  "theme_color": "#5a4332"
+}
