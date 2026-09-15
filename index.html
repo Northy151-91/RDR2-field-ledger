@@ -106,6 +106,16 @@ body{
 .install-actions{display:flex;gap:8px;flex-wrap:wrap}
 .install-actions button{min-height:42px}
 
+
+.install-card{border:1px solid var(--line);background:rgba(255,255,255,.22);padding:12px;border-radius:12px;margin:0 0 14px}
+.install-card h3{margin:0 0 4px 0}
+.install-card .sub{margin-bottom:10px}
+.install-actions{display:flex;gap:8px;flex-wrap:wrap}
+.install-actions button{min-height:42px}
+.backup-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.backup-actions button{width:100%;min-height:44px}
+@media(max-width:650px){.backup-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 @media(min-width:600px){#bottomSpacer{height:110px}
  .selector{grid-template-columns:1fr 1fr}.grid{grid-template-columns:repeat(4,1fr)}
  nav{left:50%;right:auto;transform:translateX(-50%);width:min(760px,100%)}
@@ -535,13 +545,36 @@ function copySummary(){
 }
 
 function renderMore(){
- $("#more").innerHTML=`<div class="section-title"><h2>Library & Tools</h2></div><div class="launch-grid">
+ $("#more").innerHTML=`
+ <div class="install-card">
+   <h3>Install RDR2 Field Ledger</h3>
+   <div class="sub">Add it to your phone or computer so it opens like a normal app and can work offline.</div>
+   <div class="install-actions">
+     <button onclick="installPwa()">Install App</button>
+     <button onclick="showInstallHelp()">How to install</button>
+   </div>
+ </div>
+
+ <div class="section-title"><h2>Library & Tools</h2></div><div class="launch-grid">
  <button class="launch" onclick="goTo('animals')"><b>Animals</b><span class="sub">Full 178-animal compendium, hunting data and study tracking</span></button>
  <button class="launch" onclick="goTo('horses')"><b>Horses</b><span class="sub">Wild breeds and best spawn locations</span></button>
  <button class="launch" onclick="goTo('recipes','ALL')"><b>Recipes</b><span class="sub">Guide and learned tracking</span></button>
-  <button class="launch" onclick="showFavourites()"><b>Pinned</b><span class="sub">Saved objectives and references</span></button></div>
- <div class="section-title"><h2>Backup</h2></div><div class="card"><div class="toolbar"><button onclick="downloadBackup()">Export</button><label class="chip">Import<input type="file" hidden onchange="importBackup(event)"></label><button onclick="copySummary()">Copy summary</button><button onclick="resetAll()">Reset</button></div><div class="note">Progress is stored locally on this device/browser.</div></div>
- <div class="section-title"><h2>Reference</h2></div><div class="card"><div class="sub">Animal and horse notes use established Story Mode spawn areas. Spawn RNG still applies, so camp/sleep or leave and return if an animal or herd does not appear.</div></div>`;
+ <button class="launch" onclick="showFavourites()"><b>Pinned</b><span class="sub">Saved objectives and references</span></button></div>
+
+ <div class="section-title"><h2>Backup</h2></div>
+ <div class="card">
+   <div class="backup-actions">
+     <button onclick="downloadBackup()">Export</button>
+     <button onclick="document.getElementById('backupFileInput').click()">Import</button>
+     <button onclick="copySummary()">Copy summary</button>
+     <button onclick="resetAll()">Reset</button>
+   </div>
+   <input id="backupFileInput" type="file" accept=".json,application/json" hidden onchange="importBackup(event)">
+   <div class="note">Progress is stored locally on this device/browser.</div>
+ </div>
+
+ <div class="section-title"><h2>Reference</h2></div>
+ <div class="card"><div class="sub">Animal and horse notes use established Story Mode spawn areas. Spawn RNG still applies, so camp/sleep or leave and return if an animal or herd does not appear.</div></div>`;
 }
 function render(){document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===current));document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===current));renderDashboard();renderHunt();renderAnimals();renderHorses();renderCrafts();renderRecipes();renderMore()}
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{current=b.dataset.view;window.scrollTo(0,0);render()});$("#search").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();render()});if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");
